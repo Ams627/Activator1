@@ -1,0 +1,62 @@
+= Demo of Activator.CreateInstance
+
+We can create an assembly (i.e. compile C# code into a DLL) programatically. We take a string containing code and generate
+a C# class library from it by using `CodeDomProvider.CreateProvider("CSharp").CompileAssemblyFromSource`.
+
+[source,c#]
+----
+private void MakeDll(string name)
+{
+    var parameters = new CompilerParameters
+    {
+        GenerateExecutable = false,
+        OutputAssembly = name,
+    };
+
+    var fullname = Assembly.GetExecutingAssembly().Location;
+    var dllname = Path.GetFileNameWithoutExtension(fullname);
+
+    parameters.ReferencedAssemblies.Add(fullname);
+    parameters.ReferencedAssemblies.Add("System.Xml.Linq.dll");
+    parameters.ReferencedAssemblies.Add("System.Xml.dll");
+
+    CompilerResults r = CodeDomProvider.CreateProvider("CSharp").CompileAssemblyFromSource(parameters,
+        "using System; using System.Xml.Linq; using Activator1.Tests; public class X2 : I1 {public static int i=42; public X2(XElement e, params object[] p){} public void SayHello() {Console.WriteLine(\"Hello!\");}}");
+    Debug.WriteLine(Assembly.LoadFrom(name).GetType("X2").GetField("i").GetValue(null));
+}
+
+----
+
+Points to note:
+
+. We need to add all referenced assemblies. (When we compile with Visual Studio, it adds these for us).
+. As shown above, we can reference the current assembly and use public types from it.
+. The name we pass to the `MakeDll` method should include the `.dll` extension at the end otherwise certain other methods get
+confused (e.g. `Type.GetType`).
+. We should check that `r.Errors` is empty after the compilation - otherwise the dll is not generated.
+
+== Getting types from the generated assembly using reflection
+
+[source,c#]
+----
+var dllname = "Generated.dll";
+MakeDll(dllname);
+var asmName = Path.GetFileNameWithoutExtension(dllname);
+var t1 = Type.GetType($"X2, {asmName}");
+----
+
+this should return the type `X2`. Note that we pass the filename **excluding the `.dll` extension to `Type.GetType`.
+
+
+We can then create an instance of the type by doing the following:
+
+[source,c#]
+----
+public static T CreateInstanceFromTypeName<T>(XElement classInfo, params object[] constructorParams) where T : class
+{
+    var classname = classInfo?.Attribute("Class")?.Value;
+    var cparams = new object[] { classInfo }.Concat(constructorParams).ToArray();
+    var type = Type.GetType(classname);
+    return Activator.CreateInstance(type, cparams) as T;
+}
+----
