@@ -27,8 +27,6 @@ namespace Activator1.Tests
             var dllname = "Generated.dll";
             MakeDll(dllname);
             var asmName = Path.GetFileNameWithoutExtension(dllname);
-
-            var t1 = Type.GetType($"X2, {asmName}");
             var xelement = new XElement("Ftp", new XAttribute("Class", $"X2, {asmName}"));
             var result = ActivatorUtils.CreateInstanceFromTypeName<I1>(xelement);
             result.SayHello();
@@ -51,7 +49,6 @@ namespace Activator1.Tests
 
             CompilerResults r = CodeDomProvider.CreateProvider("CSharp").CompileAssemblyFromSource(parameters,
                 "using System; using System.Xml.Linq; using Activator1.Tests; public class X2 : I1 {public static int i=42; public X2(XElement e, params object[] p){} public void SayHello() {Console.WriteLine(\"Hello!\");}}");
-            Debug.WriteLine(Assembly.LoadFrom(name).GetType("X2").GetField("i").GetValue(null));
         }
     }
 }
