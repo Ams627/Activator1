@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace Activator1
 {
-    class Program
+    internal class Program
     {
         private static void Main(string[] args)
         {
@@ -24,7 +21,6 @@ namespace Activator1
                 var progname = Path.GetFileNameWithoutExtension(fullname);
                 Console.Error.WriteLine(progname + ": Error: " + ex.Message);
             }
-
         }
     }
 }

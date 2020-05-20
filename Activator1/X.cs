@@ -3,7 +3,7 @@ using System.Xml.Linq;
 
 namespace Activator1
 {
-    class X
+    internal class X
     {
         public X(XElement e)
         {

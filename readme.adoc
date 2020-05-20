@@ -60,3 +60,9 @@ public static T CreateInstanceFromTypeName<T>(XElement classInfo, params object[
     return Activator.CreateInstance(type, cparams) as T;
 }
 ----
+
+== Assembly resolution
+
+The generated assembly is only found if it is in the current directory for the process or the GAC. It's possible to provider
+a way to _resolve_ an assembly using an overload of `Type.GetType` which takes a delegate to resolve the assembly. The delegate
+takes an assembly name and returns an `Assembly` - a reference to the loaded assembly.
